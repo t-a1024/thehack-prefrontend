@@ -1,4 +1,5 @@
-import { WorldCanvas } from "./main.js";
+import { WorldCanvas } from "./world-canvas.ts";
+import { MethodNodeSpec } from "./types.ts";
 
 type LspSymbol = {
   name: string;
@@ -59,12 +60,13 @@ async function load() {
   const gapY = 300;
 
   classes.forEach((clazz, index) => {
+    // console.log(clazz)
     world.addClassNode({
       name: clazz.name,
       x: startX,
       y: startY + index * gapY,
       methods:
-        clazz.children?.map((child) => child.name) ?? [],
+        clazz.children?.map((child) => ({ label: child.name } as MethodNodeSpec)) ?? [],
     });
   });
 }
