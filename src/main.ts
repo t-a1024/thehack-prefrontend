@@ -11,7 +11,7 @@ type ClassNodeSpec = {
   methods: string[];
 };
 
-class WorldCanvas {
+export class WorldCanvas {
   private root: HTMLElement;
   private viewport: HTMLDivElement;
   private scene: HTMLDivElement;
@@ -130,27 +130,3 @@ class WorldCanvas {
     );
   }
 }
-
-const root = document.getElementById("root");
-const viewport = document.getElementById("viewport");
-const scene = document.getElementById("scene");
-
-if (!root || !viewport || !scene) {
-  throw new Error("必要な要素が見つかりません");
-}
-
-const world = new WorldCanvas(root, viewport as HTMLDivElement, scene as HTMLDivElement);
-
-world.addClassNode({
-  name: "ClassA",
-  x: 100,
-  y: 100,
-  methods: ["methodA()", "methodB()"],
-});
-
-world.addClassNode({
-  name: "ClassB",
-  x: 100,
-  y: 400,
-  methods: ["methodC()", "methodD()"],
-});
