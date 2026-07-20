@@ -2,10 +2,12 @@ import { MethodNode } from "./method-node.js";
 import type { ClassNodeSpec } from "./types.js";
 
 export class ClassNode {
+  public readonly id: string;
   public readonly spec: ClassNodeSpec;
   public readonly element: HTMLDetailsElement;
 
-  constructor(spec: ClassNodeSpec) {
+  constructor(id: string, spec: ClassNodeSpec) {
+    this.id = id;
     this.spec = spec;
     this.element = this.createElement();
   }
@@ -14,6 +16,7 @@ export class ClassNode {
     const card = document.createElement("details");
     card.className = "class-card";
     card.open = true;
+    card.dataset.nodeId = this.id;
     card.style.left = `${this.spec.x}px`;
     card.style.top = `${this.spec.y}px`;
 

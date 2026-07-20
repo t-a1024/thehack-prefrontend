@@ -17,6 +17,7 @@ export type ClassNodeSpec = {
 };
 
 export type ArrowSpec = {
+  id?: string;
   fromId: string;
   toId: string;
 };

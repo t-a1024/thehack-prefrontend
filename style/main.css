@@ -88,3 +88,20 @@ body {
 .method-item + .method-item {
   border-top: 1px solid #f1f3f6;
 }
+
+.arrow-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.arrow-line {
+  stroke: #555;
+  stroke-width: 2;
+  fill: none;
+  marker-end: url(#arrowhead);
+}
