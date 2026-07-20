@@ -1,90 +1,206 @@
-html,
+/* グローバルスタイル */
+* {
+  box-sizing: border-box;
+}
+
 body {
-  width: 100%;
-  height: 100%;
   margin: 0;
-  overflow: hidden;
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-  background: #f4f5f7;
+  padding: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 14px;
+  background-color: #f9f9f9;
 }
 
 #root {
-  position: relative;
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  cursor: grab;
-  touch-action: none;
-  background:
-    linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
-  background-size: 32px 32px;
-  background-position: 0 0;
 }
 
-#viewport {
-  position: absolute;
-  left: 0;
-  top: 0;
-  transform-origin: 0 0;
-  will-change: transform;
-}
-
-#scene {
-  position: relative;
-  overflow: visible;
-}
-
-.class-card {
-  position: absolute;
-  width: 220px;
-  border: 1px solid #cfd6df;
-  border-radius: 10px;
-  background: #ffffff;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
+/* ビューポート */
+.viewport {
   user-select: none;
+  transition: cursor 0.2s;
+}
+
+.viewport.grabbing {
+  cursor: grabbing;
+}
+
+.viewport.grab {
+  cursor: grab;
+}
+
+/* シーン */
+.scene {
+  background-color: white;
+  background-image: 
+    linear-gradient(0deg, transparent 24%, rgba(200, 200, 200, 0.05) 25%, rgba(200, 200, 200, 0.05) 26%, transparent 27%, transparent 74%, rgba(200, 200, 200, 0.05) 75%, rgba(200, 200, 200, 0.05) 76%, transparent 77%, transparent),
+    linear-gradient(90deg, transparent 24%, rgba(200, 200, 200, 0.05) 25%, rgba(200, 200, 200, 0.05) 26%, transparent 27%, transparent 74%, rgba(200, 200, 200, 0.05) 75%, rgba(200, 200, 200, 0.05) 76%, transparent 77%, transparent);
+  background-size: 50px 50px;
+}
+
+/* クラスカード */
+.class-card {
+  position: relative;
+  width: auto;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 300px;
+}
+
+.class-card[open] {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .class-title {
-  padding: 12px 14px;
-  font-weight: 700;
   cursor: pointer;
-  list-style: none;
-  transition: background-color 0.15s ease;
+  font-weight: bold;
+  padding: 4px 0;
+  user-select: none;
 }
 
 .class-title:hover {
-  background: #eef5ff;
+  color: #0066cc;
 }
 
-.class-title::-webkit-details-marker {
-  display: none;
+/* 子要素コンテナ */
+.children {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
 }
 
-.class-card[open] .class-title {
-  border-bottom: 1px solid #e3e8ef;
-}
-
-.methods {
-  padding: 6px 0;
-}
-
+/* メソッドアイテム */
 .method-item {
-  padding: 10px 14px;
+  position: relative;
+  width: auto;
+  padding: 8px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.2s, border-color 0.2s;
+  user-select: none;
+  max-width: 280px;
 }
 
 .method-item:hover {
-  background: #f3f8ff;
+  background-color: #efefef;
+  border-color: #999;
 }
 
-.method-item + .method-item {
-  border-top: 1px solid #f1f3f6;
+.method-label {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+/* サブメソッド */
+.sub-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  margin-left: 16px;
+  border-left: 2px solid #ccc;
+  padding-left: 8px;
+}
+
+/* インターフェースカード */
+.interface-card {
+  position: relative;
+  width: auto;
+  padding: 8px;
+  border: 2px dashed #0066cc;
+  border-radius: 4px;
+  background-color: #e6f0ff;
+  box-shadow: 0 2px 4px rgba(0, 102, 204, 0.1);
+  max-width: 300px;
+}
+
+.interface-card[open] {
+  box-shadow: 0 4px 8px rgba(0, 102, 204, 0.15);
+}
+
+.interface-title {
+  cursor: pointer;
+  font-weight: bold;
+  color: #0066cc;
+  padding: 4px 0;
+  user-select: none;
+}
+
+.interface-title:hover {
+  color: #0052a3;
+}
+
+/* 矢印 */
+.arrow-element {
+  stroke: #666;
+  stroke-width: 2;
+}
+
+.arrow-element marker {
+  fill: #666;
+}
+
+/* 検索バー */
+.search-bar {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.2s;
+}
+
+.search-bar:focus {
+  outline: none;
+  border-color: #0066cc;
+  box-shadow: 0 2px 8px rgba(0, 102, 204, 0.2);
+}
+
+/* ツールバー */
+.toolbar {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar button {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.toolbar button:hover {
+  background-color: #f0f0f0;
+  border-color: #999;
+}
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+  .class-card,
+  .interface-card {
+    max-width: 100%;
+  }
+
+  .method-item {
+    max-width: 100%;
+  }
+
+  .search-bar {
+    width: 200px;
+  }
 }
