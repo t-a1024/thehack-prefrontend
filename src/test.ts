@@ -1,5 +1,5 @@
 import { WorldCanvas } from "./world-canvas.ts";
-import { MethodNodeSpec } from "./types.ts";
+import type { MethodNodeSpec } from "./types.ts";
 
 type LspSymbol = {
   name: string;

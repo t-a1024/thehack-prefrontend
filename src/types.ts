@@ -9,8 +9,14 @@ export type MethodNodeSpec = {
 };
 
 export type ClassNodeSpec = {
+  id?: string;
   name: string;
   x: number;
   y: number;
   methods: MethodNodeSpec[];
+};
+
+export type ArrowSpec = {
+  fromId: string;
+  toId: string;
 };
