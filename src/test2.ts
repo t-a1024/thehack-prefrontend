@@ -1,4 +1,4 @@
-import { WorldCanvas } from "./world-canvas.ts";
+import { WorldCanvas } from "./world-canvas.js";
 
 const root = document.getElementById("root");
 const viewport = document.getElementById("viewport");
@@ -13,8 +13,6 @@ const world = new WorldCanvas(root, viewport as HTMLDivElement, scene as HTMLDiv
 const classAId = world.addClassNode({
   id: "class-a",
   name: "ClassA",
-  x: 100,
-  y: 100,
   methods: [
     { label: "methodA()" },
     { label: "methodB()" },
@@ -24,8 +22,6 @@ const classAId = world.addClassNode({
 const classBId = world.addClassNode({
   id: "class-b",
   name: "ClassB",
-  x: 100,
-  y: 400,
   methods: [
     { label: "methodC()" },
     { label: "methodD()" },
@@ -36,5 +32,7 @@ world.addArrow({
   fromId: classAId,
   toId: classBId,
 });
+
+world.layout();
 
 console.log("test");

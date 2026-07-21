@@ -1,12 +1,12 @@
 import { MethodNode } from "./method-node.js";
-import type { ClassNodeSpec } from "./types.js";
+import type { PositionedClassNodeSpec } from "./types.js";
 
 export class ClassNode {
   public readonly id: string;
-  public readonly spec: ClassNodeSpec;
+  public readonly spec: PositionedClassNodeSpec;
   public readonly element: HTMLDetailsElement;
 
-  constructor(id: string, spec: ClassNodeSpec) {
+  constructor(id: string, spec: PositionedClassNodeSpec) {
     this.id = id;
     this.spec = spec;
     this.element = this.createElement();

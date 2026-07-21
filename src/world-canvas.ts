@@ -1,6 +1,7 @@
 import { Camera } from "./camera.js";
 import { ArrowLayer } from "./arrow-layer.js";
 import { ClassNode } from "./class-node.js";
+import { SimpleLayout } from "./layout.js";
 import type { ArrowSpec, ClassNodeSpec } from "./types.js";
 
 export class WorldCanvas {
@@ -14,8 +15,10 @@ export class WorldCanvas {
   private dragStart = { x: 0, y: 0 };
   private cameraStart = { x: 0, y: 0 };
 
+  private classSpecs = new Map<string, ClassNodeSpec & { id: string }>();
   private nodeMap = new Map<string, HTMLDetailsElement>();
   private arrowLayer: ArrowLayer;
+  private layoutEngine: SimpleLayout;
 
   constructor(root: HTMLElement, viewport: HTMLDivElement, scene: HTMLDivElement) {
     this.root = root;
@@ -24,6 +27,7 @@ export class WorldCanvas {
     this.camera = new Camera();
 
     this.arrowLayer = new ArrowLayer(this.root, this.camera, this.nodeMap);
+    this.layoutEngine = new SimpleLayout();
 
     this.bindEvents();
     this.renderCamera();
@@ -31,23 +35,31 @@ export class WorldCanvas {
 
   addClassNode(spec: ClassNodeSpec): string {
     const id = spec.id ?? this.generateId();
-    const node = new ClassNode(id, spec);
-
-    this.scene.appendChild(node.element);
-    
-
-    this.nodeMap.set(id, node.element);
-
-    node.element.addEventListener("toggle", () => {
-      this.arrowLayer.render();
-    });
-
-    this.arrowLayer.render();
+    this.classSpecs.set(id, { ...spec, id });
     return id;
   }
 
   addArrow(spec: ArrowSpec): string {
     return this.arrowLayer.addArrow(spec);
+  }
+
+  layout(): void {
+    this.scene.replaceChildren();
+    this.nodeMap.clear();
+
+    const positionedNodes = this.layoutEngine.layout([...this.classSpecs.values()]);
+
+    for (const spec of positionedNodes) {
+      const node = new ClassNode(spec.id, spec);
+      this.scene.appendChild(node.element);
+      this.nodeMap.set(spec.id, node.element);
+
+      node.element.addEventListener("toggle", () => {
+        this.arrowLayer.render();
+      });
+    }
+
+    this.arrowLayer.render();
   }
 
   private renderCamera(): void {
