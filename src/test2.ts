@@ -8,31 +8,39 @@ if (!root || !viewport || !scene) {
   throw new Error("必要な要素が見つかりません");
 }
 
-const world = new WorldCanvas(root, viewport as HTMLDivElement, scene as HTMLDivElement);
+async function main() {
+  const world = new WorldCanvas(
+    root,
+    viewport as HTMLDivElement,
+    scene as HTMLDivElement
+  );
 
-const classAId = world.addClassNode({
-  id: "class-a",
-  name: "ClassA",
-  methods: [
-    { label: "methodA()" },
-    { label: "methodB()" },
-  ],
-});
+  const classAId = world.addClassNode({
+    id: "class-a",
+    name: "ClassA",
+    methods: [
+      { label: "methodA()" },
+      { label: "methodB()" },
+    ],
+  });
 
-const classBId = world.addClassNode({
-  id: "class-b",
-  name: "ClassB",
-  methods: [
-    { label: "methodC()" },
-    { label: "methodD()" },
-  ],
-});
+  const classBId = world.addClassNode({
+    id: "class-b",
+    name: "ClassB",
+    methods: [
+      { label: "methodC()" },
+      { label: "methodD()" },
+    ],
+  });
 
-world.addArrow({
-  fromId: classAId,
-  toId: classBId,
-});
+  world.addArrow({
+    fromId: classAId,
+    toId: classBId,
+  });
 
-world.layout();
+  await world.layout();
 
-console.log("test");
+  console.log("test");
+}
+
+main().catch(console.error);

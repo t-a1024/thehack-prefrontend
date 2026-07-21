@@ -43,9 +43,17 @@ export class ArrowLayer {
   addArrow(spec: ArrowSpec): string {
     const arrow = new Arrow(spec);
     this.arrows.push(arrow);
-    this.render();
+    // this.render();
     return arrow.id;
   }
+
+  getArrows(): ArrowSpec[] {
+		return this.arrows.map((arrow) => ({
+			id: arrow.id,
+			fromId: arrow.fromId,
+			toId: arrow.toId,
+		}));
+	}
 
   render(): void {
     while (this.group.firstChild) {

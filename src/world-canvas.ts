@@ -1,7 +1,7 @@
 import { Camera } from "./camera.js";
 import { ArrowLayer } from "./arrow-layer.js";
 import { ClassNode } from "./class-node.js";
-import { SimpleLayout } from "./layout.js";
+import { ElkLayout } from "./layout.js";
 import type { ArrowSpec, ClassNodeSpec } from "./types.js";
 
 export class WorldCanvas {
@@ -18,7 +18,7 @@ export class WorldCanvas {
   private classSpecs = new Map<string, ClassNodeSpec & { id: string }>();
   private nodeMap = new Map<string, HTMLDetailsElement>();
   private arrowLayer: ArrowLayer;
-  private layoutEngine: SimpleLayout;
+  private layoutEngine: ElkLayout;
 
   constructor(root: HTMLElement, viewport: HTMLDivElement, scene: HTMLDivElement) {
     this.root = root;
@@ -27,7 +27,7 @@ export class WorldCanvas {
     this.camera = new Camera();
 
     this.arrowLayer = new ArrowLayer(this.root, this.camera, this.nodeMap);
-    this.layoutEngine = new SimpleLayout();
+    this.layoutEngine = new ElkLayout();
 
     this.bindEvents();
     this.renderCamera();
@@ -43,11 +43,14 @@ export class WorldCanvas {
     return this.arrowLayer.addArrow(spec);
   }
 
-  layout(): void {
+  async layout(): Promise<void> {
+    const positionedNodes = await this.layoutEngine.layout(
+      [...this.classSpecs.values()],
+      this.arrowLayer.getArrows()
+    );
+
     this.scene.replaceChildren();
     this.nodeMap.clear();
-
-    const positionedNodes = this.layoutEngine.layout([...this.classSpecs.values()]);
 
     for (const spec of positionedNodes) {
       const node = new ClassNode(spec.id, spec);
