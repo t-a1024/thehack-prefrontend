@@ -59,16 +59,30 @@ async function load() {
   const startY = 100;
   const gapY = 300;
 
+  const classIds:string[] = [];
+
   classes.forEach((clazz, index) => {
-    // console.log(clazz)
-    world.addClassNode({
+    const classId = world.addClassNode({
       name: clazz.name,
       x: startX,
       y: startY + index * gapY,
       methods:
         clazz.children?.map((child) => ({ label: child.name } as MethodNodeSpec)) ?? [],
     });
+    classIds.push(classId);
   });
+
+  for (let index = 0; index < classIds.length; index+=2) {
+    const classAId = classIds[index];
+    const classBId = classIds[index+1]
+
+    if (classAId&&classBId) {
+      world.addArrow({
+        fromId: classBId,
+        toId: classAId
+      });
+    }
+  }
 }
 
 load().catch(console.error);
