@@ -1,17 +1,13 @@
 import { WorldCanvas } from "./world-canvas.js";
 
 const root = document.getElementById("root");
-const viewport = document.getElementById("viewport");
-const scene = document.getElementById("scene");
 
-if (!root || !viewport || !scene) {
+if (!root) {
   throw new Error("必要な要素が見つかりません");
 }
 
 const world = new WorldCanvas(
   root,
-  viewport as HTMLDivElement,
-  scene as HTMLDivElement
 );
 
 const classSpecs = [

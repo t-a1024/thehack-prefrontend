@@ -1,13 +1,15 @@
-import { Camera } from "./camera.js";
 import { ArrowLayer } from "./arrow-layer.js";
+import { Camera } from "./camera.js";
 import { ClassNode } from "./class-node.js";
 import { ElkLayout } from "./layout.js";
-import type { ArrowSpec, ClassNodeSpec } from "./types.js";
+import type { ArrowSpec, ClassNodeSpec, NodeBounds } from "./types.js";
+
+const SVG_NS = "http://www.w3.org/2000/svg";
 
 export class WorldCanvas {
   private root: HTMLElement;
-  private viewport: HTMLDivElement;
-  private scene: HTMLDivElement;
+  private svg: SVGSVGElement;
+  private nodeLayer: SVGGElement;
 
   private camera: Camera;
 
@@ -16,17 +18,19 @@ export class WorldCanvas {
   private cameraStart = { x: 0, y: 0 };
 
   private classSpecs = new Map<string, ClassNodeSpec & { id: string }>();
-  private nodeMap = new Map<string, HTMLDetailsElement>();
+  private nodeMap = new Map<string, SVGGElement>();
+  private nodeBounds = new Map<string, NodeBounds>();
+
   private arrowLayer: ArrowLayer;
   private layoutEngine: ElkLayout;
 
-  constructor(root: HTMLElement, viewport: HTMLDivElement, scene: HTMLDivElement) {
+  constructor(root: HTMLElement) {
     this.root = root;
-    this.viewport = viewport;
-    this.scene = scene;
     this.camera = new Camera();
+    this.svg = this.createSvg();
+    this.nodeLayer = this.createNodeLayer();
 
-    this.arrowLayer = new ArrowLayer(this.root, this.camera, this.nodeMap);
+    this.arrowLayer = new ArrowLayer(this.svg, this.nodeBounds);
     this.layoutEngine = new ElkLayout();
 
     this.bindEvents();
@@ -49,25 +53,50 @@ export class WorldCanvas {
       this.arrowLayer.getArrows()
     );
 
-    this.scene.replaceChildren();
+    this.nodeLayer.replaceChildren();
     this.nodeMap.clear();
+    this.nodeBounds.clear();
 
     for (const spec of positionedNodes) {
       const node = new ClassNode(spec.id, spec);
-      this.scene.appendChild(node.element);
+      this.nodeLayer.appendChild(node.element);
       this.nodeMap.set(spec.id, node.element);
-
-      node.element.addEventListener("toggle", () => {
-        this.arrowLayer.render();
+      this.nodeBounds.set(spec.id, {
+        x: spec.x,
+        y: spec.y,
+        ...ClassNode.measure(spec),
       });
     }
 
     this.arrowLayer.render();
+    this.renderCamera();
+  }
+
+  private createSvg(): SVGSVGElement {
+    const svg = document.createElementNS(SVG_NS, "svg");
+    svg.classList.add("diagram-svg");
+    svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    svg.setAttribute("preserveAspectRatio", "xMinYMin meet");
+    this.root.appendChild(svg);
+    return svg;
+  }
+
+  private createNodeLayer(): SVGGElement {
+    const g = document.createElementNS(SVG_NS, "g");
+    g.classList.add("node-layer");
+    this.svg.appendChild(g);
+    return g;
   }
 
   private renderCamera(): void {
-    const { x, y, scale } = this.camera;
-    this.viewport.style.transform = `scale(${scale}) translate(${-x}px, ${-y}px)`;
+    const width = this.root.clientWidth || 1;
+    const height = this.root.clientHeight || 1;
+
+    this.svg.setAttribute(
+      "viewBox",
+      `${this.camera.x} ${this.camera.y} ${width / this.camera.scale} ${height / this.camera.scale}`
+    );
+
     this.arrowLayer.render();
   }
 
@@ -92,7 +121,7 @@ export class WorldCanvas {
     this.root.addEventListener("pointerdown", (e) => {
       const target = e.target as HTMLElement;
 
-      if (target.closest(".class-card")) {
+      if (target.closest(".class-node")) {
         return;
       }
 
@@ -131,5 +160,9 @@ export class WorldCanvas {
       },
       { passive: false }
     );
+
+    window.addEventListener("resize", () => {
+      this.renderCamera();
+    });
   }
 }

@@ -1,14 +1,5 @@
 import { Arrow } from "./arrow.js";
-import { ArrowNode } from "./arrow-node.js";
-import type { Camera } from "./camera.js";
-import type { ArrowSpec } from "./types.js";
-
-type Box = {
-  left: number;
-  top: number;
-  width: number;
-  height: number;
-};
+import type { ArrowSpec, NodeBounds } from "./types.js";
 
 type Point = {
   x: number;
@@ -18,72 +9,70 @@ type Point = {
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 export class ArrowLayer {
-  private readonly root: HTMLElement;
-  private readonly camera: Camera;
-  private readonly nodeMap: Map<string, HTMLDetailsElement>;
-
   private readonly svg: SVGSVGElement;
-  private readonly group: SVGGElement;
-
+  private readonly nodeBounds: Map<string, NodeBounds>;
+  private readonly layer: SVGGElement;
   private readonly arrows: Arrow[] = [];
 
-  constructor(
-    root: HTMLElement,
-    camera: Camera,
-    nodeMap: Map<string, HTMLDetailsElement>
-  ) {
-    this.root = root;
-    this.camera = camera;
-    this.nodeMap = nodeMap;
-
-    this.svg = this.createArrowLayer();
-    this.group = this.createArrowGroup();
+  constructor(svg: SVGSVGElement, nodeBounds: Map<string, NodeBounds>) {
+    this.svg = svg;
+    this.nodeBounds = nodeBounds;
+    this.layer = this.createArrowLayer();
+    this.ensureDefs();
   }
 
   addArrow(spec: ArrowSpec): string {
     const arrow = new Arrow(spec);
     this.arrows.push(arrow);
-    // this.render();
     return arrow.id;
   }
 
   getArrows(): ArrowSpec[] {
-		return this.arrows.map((arrow) => ({
-			id: arrow.id,
-			fromId: arrow.fromId,
-			toId: arrow.toId,
-		}));
-	}
+    return this.arrows.map((arrow) => ({
+      id: arrow.id,
+      fromId: arrow.fromId,
+      toId: arrow.toId,
+    }));
+  }
 
   render(): void {
-    while (this.group.firstChild) {
-      this.group.removeChild(this.group.firstChild);
-    }
+    this.layer.replaceChildren();
 
     for (const arrow of this.arrows) {
-      const from = this.nodeMap.get(arrow.fromId);
-      const to = this.nodeMap.get(arrow.toId);
+      const from = this.nodeBounds.get(arrow.fromId);
+      const to = this.nodeBounds.get(arrow.toId);
+
       if (!from || !to) continue;
 
-      const fromBox = this.getNodeBox(from);
-      const toBox = this.getNodeBox(to);
+      const endpoints = this.resolveEndpoints(from, to);
 
-      const endpoints = this.resolveEndpoints(fromBox, toBox);
+      const line = document.createElementNS(SVG_NS, "line");
+      line.classList.add("arrow-line");
+      line.setAttribute("x1", String(endpoints.from.x));
+      line.setAttribute("y1", String(endpoints.from.y));
+      line.setAttribute("x2", String(endpoints.to.x));
+      line.setAttribute("y2", String(endpoints.to.y));
 
-      const p1 = this.camera.toScreen(endpoints.from.x, endpoints.from.y);
-      const p2 = this.camera.toScreen(endpoints.to.x, endpoints.to.y);
-
-      const arrowNode = new ArrowNode();
-      arrowNode.update(p1, p2);
-      this.group.appendChild(arrowNode.element);
+      this.layer.appendChild(line);
     }
   }
 
-  private createArrowLayer(): SVGSVGElement {
-    const svg = document.createElementNS(SVG_NS, "svg");
-    svg.classList.add("arrow-layer");
+  private createArrowLayer(): SVGGElement {
+    const g = document.createElementNS(SVG_NS, "g");
+    g.classList.add("arrow-layer");
+    this.svg.appendChild(g);
+    return g;
+  }
 
-    const defs = document.createElementNS(SVG_NS, "defs");
+  private ensureDefs(): void {
+    let defs = this.svg.querySelector("defs");
+    if (!defs) {
+      defs = document.createElementNS(SVG_NS, "defs");
+      this.svg.insertBefore(defs, this.svg.firstChild);
+    }
+
+    if (defs.querySelector("#arrowhead")) return;
+
     const marker = document.createElementNS(SVG_NS, "marker");
     marker.setAttribute("id", "arrowhead");
     marker.setAttribute("markerWidth", "10");
@@ -99,50 +88,31 @@ export class ArrowLayer {
 
     marker.appendChild(path);
     defs.appendChild(marker);
-    svg.appendChild(defs);
-
-    this.root.appendChild(svg);
-    return svg;
   }
 
-  private createArrowGroup(): SVGGElement {
-    const g = document.createElementNS(SVG_NS, "g");
-    this.svg.appendChild(g);
-    return g;
-  }
+  private resolveEndpoints(from: NodeBounds, to: NodeBounds): { from: Point; to: Point } {
+    const fromCenterX = from.x + from.width / 2;
+    const fromCenterY = from.y + from.height / 2;
+    const toCenterX = to.x + to.width / 2;
+    const toCenterY = to.y + to.height / 2;
 
-  private getNodeBox(node: HTMLDetailsElement): Box {
-    return {
-      left: node.offsetLeft,
-      top: node.offsetTop,
-      width: node.offsetWidth,
-      height: node.offsetHeight,
-    };
-  }
-
-  private resolveEndpoints(fromBox: Box, toBox: Box): { from: Point; to: Point } {
-    const fromCenterX = fromBox.left + fromBox.width / 2;
-    const fromCenterY = fromBox.top + fromBox.height / 2;
-    const toCenterX = toBox.left + toBox.width / 2;
-    const toCenterY = toBox.top + toBox.height / 2;
-
-    let from: Point = { x: fromCenterX, y: fromCenterY };
-    let to: Point = { x: toCenterX, y: toCenterY };
+    let start: Point = { x: fromCenterX, y: fromCenterY };
+    let end: Point = { x: toCenterX, y: toCenterY };
 
     if (toCenterY > fromCenterY) {
-      from = { x: fromCenterX, y: fromBox.top + fromBox.height };
-      to = { x: toCenterX, y: toBox.top };
+      start = { x: fromCenterX, y: from.y + from.height };
+      end = { x: toCenterX, y: to.y };
     } else if (toCenterY < fromCenterY) {
-      from = { x: fromCenterX, y: fromBox.top };
-      to = { x: toCenterX, y: toBox.top + toBox.height };
+      start = { x: fromCenterX, y: from.y };
+      end = { x: toCenterX, y: to.y + to.height };
     } else if (toCenterX > fromCenterX) {
-      from = { x: fromBox.left + fromBox.width, y: fromCenterY };
-      to = { x: toBox.left, y: toCenterY };
+      start = { x: from.x + from.width, y: fromCenterY };
+      end = { x: to.x, y: toCenterY };
     } else if (toCenterX < fromCenterX) {
-      from = { x: fromBox.left, y: fromCenterY };
-      to = { x: toBox.left + toBox.width, y: toCenterY };
+      start = { x: from.x, y: fromCenterY };
+      end = { x: to.x + to.width, y: toCenterY };
     }
 
-    return { from, to };
+    return { from: start, to: end };
   }
 }
