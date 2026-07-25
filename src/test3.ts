@@ -1,4 +1,4 @@
-import { WorldCanvas } from "./world-canvas.js";
+import { CanvasMain } from "./canvas-main.ts";
 
 const root = document.getElementById("root");
 
@@ -6,7 +6,7 @@ if (!root) {
   throw new Error("必要な要素が見つかりません");
 }
 
-const world = new WorldCanvas(
+const world = new CanvasMain(
   root,
 );
 

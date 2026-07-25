@@ -1,12 +1,12 @@
 import { ArrowLayer } from "./arrow-layer.js";
 import { Camera } from "./camera.js";
 import { ClassNode } from "./class-node.js";
-import { ElkLayout } from "./layout.js";
+import { ElkPlacementManager } from "./layout.js";
 import type { ArrowSpec, ClassNodeSpec, NodeBounds } from "./types.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-export class WorldCanvas {
+export class CanvasMain {
   private root: HTMLElement;
   private svg: SVGSVGElement;
   private nodeLayer: SVGGElement;
@@ -22,7 +22,7 @@ export class WorldCanvas {
   private nodeBounds = new Map<string, NodeBounds>();
 
   private arrowLayer: ArrowLayer;
-  private layoutEngine: ElkLayout;
+  private layoutEngine: ElkPlacementManager;
 
   constructor(root: HTMLElement) {
     this.root = root;
@@ -31,7 +31,7 @@ export class WorldCanvas {
     this.nodeLayer = this.createNodeLayer();
 
     this.arrowLayer = new ArrowLayer(this.svg, this.nodeBounds);
-    this.layoutEngine = new ElkLayout();
+    this.layoutEngine = new ElkPlacementManager();
 
     this.bindEvents();
     this.renderCamera();

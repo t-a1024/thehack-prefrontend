@@ -15,7 +15,7 @@ type ElkGraph = {
   edges: Array<{ id: string; sources: string[]; targets: string[] }>;
 };
 
-export class ElkLayout {
+export class ElkPlacementManager {
   private readonly elk: ELK;
 
   constructor() {
