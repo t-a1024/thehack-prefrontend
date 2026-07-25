@@ -1,4 +1,6 @@
-import { CanvasMain } from "./canvas-main.ts";
+import { ArrowModel } from "./canvas-model/Arrow/ArrowModel.js";
+import { ClassModel } from "./canvas-model/block/ClassModel.js";
+import { CanvasMain } from "./CanvasMain.js";
 
 const root = document.getElementById("root");
 
@@ -80,7 +82,7 @@ const classSpecs = [
 const nodeIds = new Map<string, string>();
 
 for (const spec of classSpecs) {
-  const id = world.addClassNode(spec);
+  const id = world.addClassNode(new ClassModel(spec));
   nodeIds.set(spec.id, id);
 }
 
@@ -98,10 +100,10 @@ const arrows = [
 ];
 
 for (const arrow of arrows) {
-  world.addArrow({
+  world.addArrow(new ArrowModel({
     fromId: nodeIds.get(arrow.fromId)!,
     toId: nodeIds.get(arrow.toId)!,
-  });
+  }));
 }
 
 world.layout();

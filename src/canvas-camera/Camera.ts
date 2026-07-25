@@ -1,6 +1,8 @@
-import type { CameraState } from "./types.js";
+import type { ICamera, ICameraPoint } from "../interfaces/canvas-camera/ICamera.js";
 
-export class Camera {
+export type CameraState = Pick<ICamera, "x" | "y" | "scale">;
+
+export class Camera implements ICamera {
   public x: number;
   public y: number;
   public scale: number;
@@ -11,14 +13,14 @@ export class Camera {
     this.scale = initial?.scale ?? 1;
   }
 
-  toScreen(worldX: number, worldY: number) {
+  public toScreen(worldX: number, worldY: number): ICameraPoint {
     return {
       x: (worldX - this.x) * this.scale,
       y: (worldY - this.y) * this.scale,
     };
   }
 
-  toWorld(screenX: number, screenY: number) {
+  public toWorld(screenX: number, screenY: number): ICameraPoint {
     return {
       x: screenX / this.scale + this.x,
       y: screenY / this.scale + this.y,
