@@ -1,6 +1,6 @@
 import ELK from "elkjs/lib/elk.bundled.js";
-import { ClassModel } from "../canvas-model/block/ClassModel.js";
-import type { ArrowModel } from "../canvas-model/Arrow/ArrowModel.js";
+import type { ICanvasArrowModel } from "../interfaces/canvas-model/ICanvasArrowModel.js";
+import type { ICanvasBlockModel } from "../interfaces/canvas-model/ICanvasBlockModel.js";
 import type { ICanvasPlacement } from "../interfaces/canvas-placement/ICanvasPlacement.js";
 
 type ElkGraph = {
@@ -10,7 +10,7 @@ type ElkGraph = {
   edges: Array<{ id: string; sources: string[]; targets: string[] }>;
 };
 
-export class CanvasPlacementElk implements ICanvasPlacement<ClassModel, ArrowModel> {
+export class CanvasPlacementElk implements ICanvasPlacement<ICanvasBlockModel, ICanvasArrowModel> {
   private readonly elk: ELK;
 
   constructor() {
@@ -22,7 +22,7 @@ export class CanvasPlacementElk implements ICanvasPlacement<ClassModel, ArrowMod
     });
   }
 
-  public async layout(blocks: ClassModel[], arrows: ArrowModel[]): Promise<ClassModel[]> {
+  public async layout(blocks: ICanvasBlockModel[], arrows: ICanvasArrowModel[]): Promise<ICanvasBlockModel[]> {
     if (blocks.length === 0) return [];
 
     const graph: ElkGraph = {
@@ -33,7 +33,7 @@ export class CanvasPlacementElk implements ICanvasPlacement<ClassModel, ArrowMod
       },
       children: blocks.map((block) => ({
         id: block.id,
-        ...ClassModel.measure(block),
+        ...block.measure(),
       })),
       edges: arrows.map((arrow, index) => ({
         id: arrow.id ?? `arrow-${index}`,
@@ -49,7 +49,7 @@ export class CanvasPlacementElk implements ICanvasPlacement<ClassModel, ArrowMod
     );
 
     return blocks.map((block) => {
-      const p = placed.get(block.id) as { x?: number; y?: number } | undefined;
+      const p = placed.get(block.id);
       block.x = p?.x ?? 0;
       block.y = p?.y ?? 0;
       return block;

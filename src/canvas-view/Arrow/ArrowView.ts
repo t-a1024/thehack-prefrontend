@@ -1,5 +1,5 @@
-import type { ICanvasArrowView } from "../../interfaces/canvas-view/ICanvasArrowView.js";
 import type { ICanvasArrowModel } from "../../interfaces/canvas-model/ICanvasArrowModel.js";
+import type { ICanvasArrowView } from "../../interfaces/canvas-view/ICanvasArrowView.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 

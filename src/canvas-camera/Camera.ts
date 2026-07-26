@@ -1,6 +1,10 @@
 import type { ICamera, ICameraPoint } from "../interfaces/canvas-camera/ICamera.js";
 
-export type CameraState = Pick<ICamera, "x" | "y" | "scale">;
+export interface CameraState {
+  x: number;
+  y: number;
+  scale: number;
+}
 
 export class Camera implements ICamera {
   public x: number;

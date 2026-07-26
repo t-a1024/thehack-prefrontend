@@ -1,8 +1,9 @@
-import { ArrowModel } from "./canvas-model/Arrow/ArrowModel.js";
-import { ClassModel } from "./canvas-model/block/ClassModel.js";
+import type { ICanvasArrowModel } from "./interfaces/canvas-model/ICanvasArrowModel.js";
+import type { ICanvasBlockModel } from "./interfaces/canvas-model/ICanvasBlockModel.js";
 import { Camera } from "./canvas-camera/Camera.js";
 import { ArrowView } from "./canvas-view/Arrow/ArrowView.js";
 import { ClassView } from "./canvas-view/block/ClassView.js";
+import { MethodView } from "./canvas-view/block/MethodView.js";
 import { CanvasPlacementElk } from "./canvas-placement/CanvasPlacementElk.js";
 import type { ICamera } from "./interfaces/canvas-camera/ICamera.js";
 import type { ICanvasPlacement } from "./interfaces/canvas-placement/ICanvasPlacement.js";
@@ -33,11 +34,11 @@ export class CanvasMain {
   private dragStart = { x: 0, y: 0 };
   private cameraStart = { x: 0, y: 0 };
 
-  private readonly classModels = new Map<string, ClassModel>();
-  private readonly arrowModels = new Map<string, ArrowModel>();
+  private readonly blockModels = new Map<string, ICanvasBlockModel>();
+  private readonly arrowModels = new Map<string, ICanvasArrowModel>();
   private readonly nodeBounds = new Map<string, NodeBounds>();
 
-  private readonly placementEngine: ICanvasPlacement<ClassModel, ArrowModel>;
+  private readonly placementEngine: ICanvasPlacement<ICanvasBlockModel, ICanvasArrowModel>;
 
   constructor(root: HTMLElement) {
     this.root = root;
@@ -51,36 +52,23 @@ export class CanvasMain {
     this.renderCamera();
   }
 
-  public addClassNode(model: ClassModel): string {
-    this.classModels.set(model.id, model);
+  public addBlock(model: ICanvasBlockModel): string {
+    this.blockModels.set(model.id, model);
     return model.id;
   }
 
-  public addArrow(model: ArrowModel): string {
+  public addArrow(model: ICanvasArrowModel): string {
     this.arrowModels.set(model.id, model);
     return model.id;
   }
 
   public async layout(): Promise<void> {
-    const positionedNodes = await this.placementEngine.layout(
-      [...this.classModels.values()],
+    const positionedBlocks = await this.placementEngine.layout(
+      [...this.blockModels.values()],
       [...this.arrowModels.values()]
     );
 
-    this.nodeLayer.replaceChildren();
-    this.nodeBounds.clear();
-
-    for (const model of positionedNodes) {
-      const view = new ClassView(model.id);
-      view.render(model);
-      this.nodeLayer.appendChild(view.element);
-      this.nodeBounds.set(model.id, {
-        x: model.x,
-        y: model.y,
-        ...model.measure(),
-      });
-    }
-
+    this.renderBlocks(positionedBlocks);
     this.renderCamera();
   }
 
@@ -105,6 +93,22 @@ export class CanvasMain {
     g.classList.add("node-layer");
     this.svg.appendChild(g);
     return g;
+  }
+
+  private renderBlocks(blocks: ICanvasBlockModel[]): void {
+    this.nodeLayer.replaceChildren();
+    this.nodeBounds.clear();
+
+    for (const block of blocks) {
+      const view = this.createBlockView(block);
+      view.render(block);
+      this.nodeLayer.appendChild(view.element);
+      this.nodeBounds.set(block.id, {
+        x: block.x,
+        y: block.y,
+        ...block.measure(),
+      });
+    }
   }
 
   private renderCamera(): void {
@@ -162,6 +166,17 @@ export class CanvasMain {
     defs.appendChild(marker);
   }
 
+  private createBlockView(model: ICanvasBlockModel): ClassView | MethodView {
+    switch (model.kind) {
+      case "class":
+        return new ClassView(model.id);
+      case "method":
+        return new MethodView(model.id);
+      default:
+        return new MethodView(model.id);
+    }
+  }
+
   private resolveEndpoints(from: NodeBounds, to: NodeBounds): { from: Point; to: Point } {
     const fromCenterX = from.x + from.width / 2;
     const fromCenterY = from.y + from.height / 2;
@@ -202,7 +217,7 @@ export class CanvasMain {
     this.root.addEventListener("pointerdown", (e) => {
       const target = e.target as HTMLElement;
 
-      if (target.closest(".class-node")) {
+      if (target.closest(".class-node") || target.closest(".method-node")) {
         return;
       }
 

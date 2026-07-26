@@ -7,7 +7,10 @@ export interface ArrowModelInit {
 }
 
 export class ArrowModel implements ICanvasArrowModel {
+  public static readonly KIND = "arrow";
+
   public readonly id: string;
+  public readonly kind = ArrowModel.KIND;
   public readonly fromId: string;
   public readonly toId: string;
 

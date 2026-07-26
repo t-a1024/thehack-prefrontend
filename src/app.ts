@@ -11,11 +11,11 @@ if (!root) {
 
 const world = new CanvasMain(root);
 
-const classModels = [
+const blockModels = [
   new ClassModel({
     id: "app",
     name: "App",
-    methods: [
+    children: [
       new MethodModel({ label: "main()" }),
       new MethodModel({ label: "start()" }),
       new MethodModel({ label: "shutdown()" }),
@@ -24,7 +24,7 @@ const classModels = [
   new ClassModel({
     id: "controller",
     name: "Controller",
-    methods: [
+    children: [
       new MethodModel({ label: "handleRequest()" }),
       new MethodModel({ label: "route()" }),
       new MethodModel({ label: "validate()" }),
@@ -33,7 +33,7 @@ const classModels = [
   new ClassModel({
     id: "service",
     name: "UserService",
-    methods: [
+    children: [
       new MethodModel({ label: "createUser()" }),
       new MethodModel({ label: "deleteUser()" }),
       new MethodModel({ label: "findUser()" }),
@@ -43,7 +43,7 @@ const classModels = [
   new ClassModel({
     id: "repository",
     name: "UserRepository",
-    methods: [
+    children: [
       new MethodModel({ label: "save()" }),
       new MethodModel({ label: "findById()" }),
       new MethodModel({ label: "findAll()" }),
@@ -52,7 +52,7 @@ const classModels = [
   new ClassModel({
     id: "logger",
     name: "Logger",
-    methods: [
+    children: [
       new MethodModel({ label: "info()" }),
       new MethodModel({ label: "warn()" }),
       new MethodModel({ label: "error()" }),
@@ -61,7 +61,7 @@ const classModels = [
   new ClassModel({
     id: "validator",
     name: "Validator",
-    methods: [
+    children: [
       new MethodModel({ label: "isValidName()" }),
       new MethodModel({ label: "isValidEmail()" }),
       new MethodModel({ label: "isValidPassword()" }),
@@ -70,20 +70,24 @@ const classModels = [
   new ClassModel({
     id: "cache",
     name: "Cache",
-    methods: [
+    children: [
       new MethodModel({ label: "get()" }),
       new MethodModel({ label: "set()" }),
       new MethodModel({ label: "remove()" }),
+      new ClassModel({name: "none", children:[]}),
     ],
   }),
 ];
 
 const nodeIds = new Map<string, string>();
 
-for (const model of classModels) {
-  const id = world.addClassNode(model);
+for (const model of blockModels) {
+  const id = world.addBlock(model);
   nodeIds.set(model.id, id);
 }
+
+const tekito = new MethodModel({label: "tekito-"})
+world.addBlock(tekito);
 
 const arrows = [
   { fromId: "app", toId: "controller" },

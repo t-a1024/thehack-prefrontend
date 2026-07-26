@@ -1,30 +1,36 @@
 import type { ICanvasBlockModel } from "../../interfaces/canvas-model/ICanvasBlockModel.js";
-import { MethodModel } from "./MethodModel.js";
+import type { ICanvasElementModel } from "../../interfaces/canvas-model/ICanvasElementModel.js";
 
 export interface ClassModelInit {
   id?: string;
   name: string;
-  methods: MethodModel[];
+  children: ICanvasElementModel[];
   x?: number;
   y?: number;
 }
 
+function isCanvasBlockLike(model: ICanvasElementModel): model is ICanvasBlockModel {
+  return typeof (model as Partial<ICanvasBlockModel>).measure === "function";
+}
+
 export class ClassModel implements ICanvasBlockModel {
+  public static readonly KIND = "class";
   public static readonly WIDTH = 240;
   public static readonly PADDING = 12;
   public static readonly TITLE_HEIGHT = 28;
   public static readonly HEADER_GAP = 8;
 
   public readonly id: string;
+  public readonly kind = ClassModel.KIND;
   public name: string;
-  public methods: MethodModel[];
+  public children: ICanvasElementModel[];
   public x: number;
   public y: number;
 
   constructor(init: ClassModelInit) {
     this.id = init.id ?? ClassModel.generateId();
     this.name = init.name;
-    this.methods = init.methods;
+    this.children = init.children;
     this.x = init.x ?? 0;
     this.y = init.y ?? 0;
   }
@@ -33,14 +39,27 @@ export class ClassModel implements ICanvasBlockModel {
     return ClassModel.measure(this);
   }
 
-  public static measure(model: Pick<ClassModel, "methods">): { width: number; height: number } {
+  public static measure(model: Pick<ClassModel, "children">): { width: number; height: number } {
+    let widestChildWidth = 0;
+    let childrenHeight = 0;
+
+    for (const child of model.children) {
+      if (!isCanvasBlockLike(child)) {
+        continue;
+      }
+
+      const childSize = child.measure();
+      widestChildWidth = Math.max(widestChildWidth, childSize.width);
+      childrenHeight += childSize.height;
+    }
+
     return {
-      width: ClassModel.WIDTH,
+      width: Math.max(ClassModel.WIDTH, widestChildWidth + ClassModel.PADDING * 2),
       height:
         ClassModel.PADDING * 2 +
         ClassModel.TITLE_HEIGHT +
         ClassModel.HEADER_GAP +
-        model.methods.length * MethodModel.HEIGHT,
+        childrenHeight,
     };
   }
 
