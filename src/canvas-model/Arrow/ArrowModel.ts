@@ -1,3 +1,4 @@
+import { CanvasElementRelation } from "../../lib/CanvasElementRelation.js";
 import type { ICanvasArrowModel } from "../../interfaces/canvas-model/ICanvasArrowModel.js";
 
 export interface ArrowModelInit {
@@ -8,6 +9,7 @@ export interface ArrowModelInit {
 
 export class ArrowModel implements ICanvasArrowModel {
   public readonly id: string;
+  public readonly relation = CanvasElementRelation.Arrow;
   public readonly fromId: string;
   public readonly toId: string;
 

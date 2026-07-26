@@ -1,5 +1,6 @@
 import { ArrowModel } from "./canvas-model/Arrow/ArrowModel.js";
 import { ClassModel } from "./canvas-model/block/ClassModel.js";
+import { MethodModel } from "./canvas-model/block/MethodModel.js";
 import { CanvasMain } from "./CanvasMain.js";
 
 const root = document.getElementById("root");
@@ -17,7 +18,7 @@ const classSpecs = [
     id: "app",
     name: "App",
     methods: [
-      { label: "main()" },
+      new MethodModel({ label: "main()" }),
       { label: "start()" },
       { label: "shutdown()" },
     ],
@@ -75,6 +76,7 @@ const classSpecs = [
       { label: "get()" },
       { label: "set()" },
       { label: "remove()" },
+
     ],
   },
 ];
@@ -82,9 +84,12 @@ const classSpecs = [
 const nodeIds = new Map<string, string>();
 
 for (const spec of classSpecs) {
-  const id = world.addClassNode(new ClassModel(spec));
+  const id = world.addBlock(new ClassModel(spec));
   nodeIds.set(spec.id, id);
 }
+
+const tekito = new MethodModel({label:"tekito----"})
+world.addBlock(tekito);
 
 const arrows = [
   { fromId: "app", toId: "controller" },

@@ -1,10 +1,16 @@
-import type { ICanvasBlockModel } from "../../interfaces/canvas-model/ICanvasBlockModel.js";
-import { MethodModel } from "./MethodModel.js";
+import { CanvasElementRelation } from '../../lib/CanvasElementRelation.js';
+import type { ICanvasBlockModel } from '../../interfaces/canvas-model/ICanvasBlockModel.js';
+import type { ICanvasElementModel } from '../../interfaces/canvas-model/ICanvasElementModel.js';
+import { MethodModel } from './MethodModel.js';
+
+type MeasurableElementModel = ICanvasElementModel & {
+  measure?: () => { width: number; height: number };
+};
 
 export interface ClassModelInit {
   id?: string;
   name: string;
-  methods: MethodModel[];
+  methods: ICanvasElementModel[];
   x?: number;
   y?: number;
 }
@@ -16,8 +22,9 @@ export class ClassModel implements ICanvasBlockModel {
   public static readonly HEADER_GAP = 8;
 
   public readonly id: string;
+  public readonly relation = CanvasElementRelation.ClassBlock;
   public name: string;
-  public methods: MethodModel[];
+  public methods: ICanvasElementModel[];
   public x: number;
   public y: number;
 
@@ -33,19 +40,30 @@ export class ClassModel implements ICanvasBlockModel {
     return ClassModel.measure(this);
   }
 
-  public static measure(model: Pick<ClassModel, "methods">): { width: number; height: number } {
+  public static measure(model: Pick<ClassModel, 'methods'>): { width: number; height: number } {
+    const methodHeight = model.methods.reduce((sum, element) => sum + ClassModel.measureElementHeight(element), 0);
+
     return {
       width: ClassModel.WIDTH,
       height:
         ClassModel.PADDING * 2 +
         ClassModel.TITLE_HEIGHT +
         ClassModel.HEADER_GAP +
-        model.methods.length * MethodModel.HEIGHT,
+        methodHeight,
     };
   }
 
+  private static measureElementHeight(element: ICanvasElementModel): number {
+    const measurable = element as MeasurableElementModel;
+    if (typeof measurable.measure === 'function') {
+      return measurable.measure().height;
+    }
+
+    return MethodModel.HEIGHT;
+  }
+
   private static generateId(): string {
-    if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
       return crypto.randomUUID();
     }
     return `class-${Date.now()}-${Math.random().toString(16).slice(2)}`;

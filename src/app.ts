@@ -81,7 +81,7 @@ const classModels = [
 const nodeIds = new Map<string, string>();
 
 for (const model of classModels) {
-  const id = world.addClassNode(model);
+  const id = world.addBlock(model);
   nodeIds.set(model.id, id);
 }
 

@@ -1,9 +1,17 @@
-import { ClassModel } from "../../canvas-model/block/ClassModel.js";
-import { MethodModel } from "../../canvas-model/block/MethodModel.js";
-import { MethodView } from "./MethodView.js";
-import type { ICanvasBlockView } from "../../interfaces/canvas-view/ICanvasBlockView.js";
+import { CanvasElementRelation } from '../../lib/CanvasElementRelation.js';
+import type { ICanvasElementModel } from '../../interfaces/canvas-model/ICanvasElementModel.js';
+import type { ICanvasBlockView } from '../../interfaces/canvas-view/ICanvasBlockView.js';
+import { ClassModel } from '../../canvas-model/block/ClassModel.js';
+import { MethodModel } from '../../canvas-model/block/MethodModel.js';
+import { MethodView } from './MethodView.js';
 
-const SVG_NS = "http://www.w3.org/2000/svg";
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+type MeasurableElementModel = ICanvasElementModel & {
+  relation?: CanvasElementRelation;
+  measure?: () => { width: number; height: number };
+  label?: string;
+};
 
 export class ClassView implements ICanvasBlockView<ClassModel> {
   public readonly id: string;
@@ -13,9 +21,9 @@ export class ClassView implements ICanvasBlockView<ClassModel> {
 
   constructor(id: string) {
     this.id = id;
-    this.element = document.createElementNS(SVG_NS, "g");
-    this.element.classList.add("class-node");
-    this.element.setAttribute("data-node-id", this.id);
+    this.element = document.createElementNS(SVG_NS, 'g');
+    this.element.classList.add('class-node');
+    this.element.setAttribute('data-node-id', this.id);
   }
 
   public measure(): { width: number; height: number } {
@@ -27,33 +35,33 @@ export class ClassView implements ICanvasBlockView<ClassModel> {
     const { width, height } = model.measure();
 
     this.element.replaceChildren();
-    this.element.setAttribute("transform", `translate(${model.x}, ${model.y})`);
+    this.element.setAttribute('transform', `translate(${model.x}, ${model.y})`);
 
-    const box = document.createElementNS(SVG_NS, "rect");
-    box.classList.add("class-node-box");
-    box.setAttribute("x", "0");
-    box.setAttribute("y", "0");
-    box.setAttribute("width", String(width));
-    box.setAttribute("height", String(height));
-    box.setAttribute("rx", "10");
-    box.setAttribute("ry", "10");
+    const box = document.createElementNS(SVG_NS, 'rect');
+    box.classList.add('class-node-box');
+    box.setAttribute('x', '0');
+    box.setAttribute('y', '0');
+    box.setAttribute('width', String(width));
+    box.setAttribute('height', String(height));
+    box.setAttribute('rx', '10');
+    box.setAttribute('ry', '10');
 
-    const title = document.createElementNS(SVG_NS, "text");
-    title.classList.add("class-title");
-    title.setAttribute("x", String(ClassModel.PADDING));
-    title.setAttribute("y", String(ClassModel.PADDING + ClassModel.TITLE_HEIGHT / 2));
+    const title = document.createElementNS(SVG_NS, 'text');
+    title.classList.add('class-title');
+    title.setAttribute('x', String(ClassModel.PADDING));
+    title.setAttribute('y', String(ClassModel.PADDING + ClassModel.TITLE_HEIGHT / 2));
     title.textContent = model.name;
 
-    const separator = document.createElementNS(SVG_NS, "line");
-    separator.classList.add("class-separator");
-    separator.setAttribute("x1", String(ClassModel.PADDING));
-    separator.setAttribute("x2", String(width - ClassModel.PADDING));
+    const separator = document.createElementNS(SVG_NS, 'line');
+    separator.classList.add('class-separator');
+    separator.setAttribute('x1', String(ClassModel.PADDING));
+    separator.setAttribute('x2', String(width - ClassModel.PADDING));
     separator.setAttribute(
-      "y1",
+      'y1',
       String(ClassModel.PADDING + ClassModel.TITLE_HEIGHT + ClassModel.HEADER_GAP / 2)
     );
     separator.setAttribute(
-      "y2",
+      'y2',
       String(ClassModel.PADDING + ClassModel.TITLE_HEIGHT + ClassModel.HEADER_GAP / 2)
     );
 
@@ -64,15 +72,33 @@ export class ClassView implements ICanvasBlockView<ClassModel> {
     const methodsStartY = ClassModel.PADDING + ClassModel.TITLE_HEIGHT + ClassModel.HEADER_GAP;
     const methodWidth = width - ClassModel.PADDING * 2;
 
-    model.methods.forEach((methodModel, index) => {
-      const methodView = new MethodView(
-        methodModel.id,
-        ClassModel.PADDING,
-        methodsStartY + index * MethodModel.HEIGHT,
-        methodWidth
-      );
-      methodView.render(methodModel);
+    let currentY = methodsStartY;
+    for (const methodModel of model.methods) {
+      const methodHeight = this.measureChild(methodModel);
+      const methodView = this.createChildView(methodModel, ClassModel.PADDING, currentY, methodWidth);
+      methodView.render(methodModel as MethodModel);
       this.element.appendChild(methodView.element);
-    });
+      currentY += methodHeight;
+    }
+  }
+
+  private measureChild(model: ICanvasElementModel): number {
+    const measurable = model as MeasurableElementModel;
+    if (typeof measurable.measure === 'function') {
+      return measurable.measure().height;
+    }
+
+    return MethodModel.HEIGHT;
+  }
+
+  private createChildView(model: ICanvasElementModel, x: number, y: number, width: number): MethodView {
+    const relation = (model as MeasurableElementModel).relation ?? CanvasElementRelation.MethodBlock;
+
+    switch (relation) {
+      case CanvasElementRelation.MethodBlock:
+        return new MethodView(model.id, x, y, width);
+      default:
+        return new MethodView(model.id, x, y, width);
+    }
   }
 }
