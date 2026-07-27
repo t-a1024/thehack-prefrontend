@@ -100,7 +100,7 @@ export class CanvasMain {
     this.nodeBounds.clear();
 
     for (const block of blocks) {
-      const view = this.createBlockView(block);
+      const view = block.kind;
       view.render(block);
       this.nodeLayer.appendChild(view.element);
       this.nodeBounds.set(block.id, {
@@ -164,17 +164,6 @@ export class CanvasMain {
 
     marker.appendChild(path);
     defs.appendChild(marker);
-  }
-
-  private createBlockView(model: ICanvasBlockModel): ClassView | MethodView {
-    switch (model.kind) {
-      case "class":
-        return new ClassView(model.id);
-      case "method":
-        return new MethodView(model.id);
-      default:
-        return new MethodView(model.id);
-    }
   }
 
   private resolveEndpoints(from: NodeBounds, to: NodeBounds): { from: Point; to: Point } {

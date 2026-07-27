@@ -15,10 +15,10 @@ export class ArrowView implements ICanvasArrowView {
   private readonly from: Point;
   private readonly to: Point;
 
-  constructor(id: string, from: Point, to: Point) {
+  constructor(id: string, from?: Point, to?: Point) {
     this.id = id;
-    this.from = from;
-    this.to = to;
+    this.from = from ?? { x:0, y:0 };
+    this.to = to ?? { x:0, y:0 };
     this.element = document.createElementNS(SVG_NS, "line");
     this.element.classList.add("arrow-line");
   }

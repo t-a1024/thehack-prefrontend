@@ -1,3 +1,4 @@
+import { MethodView } from "../../canvas-view/block/MethodView.js";
 import type { ICanvasBlockModel } from "../../interfaces/canvas-model/ICanvasBlockModel.js";
 
 export interface MethodModelInit {
@@ -8,19 +9,19 @@ export interface MethodModelInit {
 }
 
 export class MethodModel implements ICanvasBlockModel {
-  public static readonly KIND = "method";
   public static readonly WIDTH = 216;
   public static readonly HEIGHT = 26;
   public static readonly PADDING_X = 12;
 
   public readonly id: string;
-  public readonly kind = MethodModel.KIND;
+  public readonly kind: MethodView;
   public label: string;
   public x: number;
   public y: number;
 
   constructor(init: MethodModelInit) {
     this.id = init.id ?? MethodModel.generateId();
+    this.kind = new MethodView(this.id);
     this.label = init.label;
     this.x = init.x ?? 0;
     this.y = init.y ?? 0;

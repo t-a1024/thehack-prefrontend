@@ -11,17 +11,6 @@ function isCanvasBlockLike(model: ICanvasElementModel): model is ICanvasBlockMod
   return typeof (model as Partial<ICanvasBlockModel>).measure === "function";
 }
 
-function createChildView(model: ICanvasBlockModel): ClassView | MethodView {
-  switch (model.kind) {
-    case ClassModel.KIND:
-      return new ClassView(model.id);
-    case MethodModel.KIND:
-      return new MethodView(model.id);
-    default:
-      return new MethodView(model.id);
-  }
-}
-
 export class ClassView implements ICanvasBlockView<ClassModel> {
   public readonly id: string;
   public readonly element: SVGGElement;
@@ -90,7 +79,7 @@ export class ClassView implements ICanvasBlockView<ClassModel> {
       child.x = ClassModel.PADDING;
       child.y = currentY;
 
-      const childView = createChildView(child);
+      const childView = child.kind;
       childView.render(child);
       this.element.appendChild(childView.element);
 

@@ -1,3 +1,4 @@
+import { ClassView } from "../../canvas-view/block/ClassView.js";
 import type { ICanvasBlockModel } from "../../interfaces/canvas-model/ICanvasBlockModel.js";
 import type { ICanvasElementModel } from "../../interfaces/canvas-model/ICanvasElementModel.js";
 
@@ -14,14 +15,13 @@ function isCanvasBlockLike(model: ICanvasElementModel): model is ICanvasBlockMod
 }
 
 export class ClassModel implements ICanvasBlockModel {
-  public static readonly KIND = "class";
   public static readonly WIDTH = 240;
   public static readonly PADDING = 12;
   public static readonly TITLE_HEIGHT = 28;
   public static readonly HEADER_GAP = 8;
 
   public readonly id: string;
-  public readonly kind = ClassModel.KIND;
+  public readonly kind: ClassView;
   public name: string;
   public children: ICanvasElementModel[];
   public x: number;
@@ -29,6 +29,7 @@ export class ClassModel implements ICanvasBlockModel {
 
   constructor(init: ClassModelInit) {
     this.id = init.id ?? ClassModel.generateId();
+    this.kind = new ClassView(this.id);
     this.name = init.name;
     this.children = init.children;
     this.x = init.x ?? 0;
