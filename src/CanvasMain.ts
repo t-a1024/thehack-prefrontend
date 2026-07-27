@@ -1,9 +1,6 @@
 import type { ICanvasArrowModel } from "./interfaces/canvas-model/ICanvasArrowModel.js";
 import type { ICanvasBlockModel } from "./interfaces/canvas-model/ICanvasBlockModel.js";
 import { Camera } from "./canvas-camera/Camera.js";
-import { ArrowView } from "./canvas-view/Arrow/ArrowView.js";
-import { ClassView } from "./canvas-view/block/ClassView.js";
-import { MethodView } from "./canvas-view/block/MethodView.js";
 import { CanvasPlacementElk } from "./canvas-placement/CanvasPlacementElk.js";
 import type { ICamera } from "./interfaces/canvas-camera/ICamera.js";
 import type { ICanvasPlacement } from "./interfaces/canvas-placement/ICanvasPlacement.js";

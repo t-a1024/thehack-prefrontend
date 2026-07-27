@@ -6,7 +6,7 @@ import type { ICanvasElementView } from "../../interfaces/canvas-view/ICanvasEle
 export interface ClassModelInit {
   id?: string;
   name: string;
-  children: ICanvasElementModel[];
+  children?: ICanvasElementModel[];
   x?: number;
   y?: number;
 }
@@ -30,7 +30,7 @@ export class ClassModel implements ICanvasBlockModel {
   constructor(init: ClassModelInit) {
     this.id = init.id ?? ClassModel.generateId();
     this.name = init.name;
-    this.children = init.children;
+    this.children = init.children ?? [];
     this.x = init.x ?? 0;
     this.y = init.y ?? 0;
   }
