@@ -1,5 +1,8 @@
 import { ArrowView } from "../../canvas-view/Arrow/ArrowView.js";
 import type { ICanvasArrowModel } from "../../interfaces/canvas-model/ICanvasArrowModel.js";
+import type { ICanvasElementModel } from "../../interfaces/canvas-model/ICanvasElementModel.js";
+import type { ICanvasElementView } from "../../interfaces/canvas-view/ICanvasElementView.js";
+import type { Point } from "../../types/types.js";
 
 export interface ArrowModelInit {
   id?: string;
@@ -8,18 +11,24 @@ export interface ArrowModelInit {
 }
 
 export class ArrowModel implements ICanvasArrowModel {
-  public static readonly KIND = "arrow";
-
   public readonly id: string;
-  public readonly kind: ArrowView;
   public readonly fromId: string;
   public readonly toId: string;
 
+  public fromPoint: Point;
+  public toPoint: Point;
+
   constructor(init: ArrowModelInit) {
     this.id = init.id ?? ArrowModel.generateId();
-    this.kind = new ArrowView(this.id);
     this.fromId = init.fromId;
     this.toId = init.toId;
+
+    this.fromPoint = { x:0, y:0 };
+    this.toPoint = { x:0, y:0 };
+  }
+
+  createView(): ICanvasElementView<ICanvasElementModel> {
+    return new ArrowView(this.id);
   }
 
   private static generateId(): string {

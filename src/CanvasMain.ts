@@ -100,7 +100,7 @@ export class CanvasMain {
     this.nodeBounds.clear();
 
     for (const block of blocks) {
-      const view = block.kind;
+      const view = block.createView();
       view.render(block);
       this.nodeLayer.appendChild(view.element);
       this.nodeBounds.set(block.id, {
@@ -134,7 +134,11 @@ export class CanvasMain {
       if (!from || !to) continue;
 
       const endpoints = this.resolveEndpoints(from, to);
-      const arrowView = new ArrowView(arrowModel.id, endpoints.from, endpoints.to);
+
+      arrowModel.fromPoint = endpoints.from;
+      arrowModel.toPoint = endpoints.to;
+
+      const arrowView = arrowModel.createView();
       arrowView.render(arrowModel);
       this.arrowLayer.appendChild(arrowView.element);
     }

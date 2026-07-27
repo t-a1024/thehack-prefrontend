@@ -79,7 +79,7 @@ export class ClassView implements ICanvasBlockView<ClassModel> {
       child.x = ClassModel.PADDING;
       child.y = currentY;
 
-      const childView = child.kind;
+      const childView = child.createView();
       childView.render(child);
       this.element.appendChild(childView.element);
 

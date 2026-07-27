@@ -1,6 +1,7 @@
 import { ClassView } from "../../canvas-view/block/ClassView.js";
 import type { ICanvasBlockModel } from "../../interfaces/canvas-model/ICanvasBlockModel.js";
 import type { ICanvasElementModel } from "../../interfaces/canvas-model/ICanvasElementModel.js";
+import type { ICanvasElementView } from "../../interfaces/canvas-view/ICanvasElementView.js";
 
 export interface ClassModelInit {
   id?: string;
@@ -21,7 +22,6 @@ export class ClassModel implements ICanvasBlockModel {
   public static readonly HEADER_GAP = 8;
 
   public readonly id: string;
-  public readonly kind: ClassView;
   public name: string;
   public children: ICanvasElementModel[];
   public x: number;
@@ -29,11 +29,14 @@ export class ClassModel implements ICanvasBlockModel {
 
   constructor(init: ClassModelInit) {
     this.id = init.id ?? ClassModel.generateId();
-    this.kind = new ClassView(this.id);
     this.name = init.name;
     this.children = init.children;
     this.x = init.x ?? 0;
     this.y = init.y ?? 0;
+  }
+
+  createView(): ICanvasElementView<this> {
+    return new ClassView(this.id)
   }
 
   public measure(): { width: number; height: number } {

@@ -1,5 +1,6 @@
 import { MethodView } from "../../canvas-view/block/MethodView.js";
 import type { ICanvasBlockModel } from "../../interfaces/canvas-model/ICanvasBlockModel.js";
+import type { ICanvasElementView } from "../../interfaces/canvas-view/ICanvasElementView.js";
 
 export interface MethodModelInit {
   id?: string;
@@ -14,17 +15,19 @@ export class MethodModel implements ICanvasBlockModel {
   public static readonly PADDING_X = 12;
 
   public readonly id: string;
-  public readonly kind: MethodView;
   public label: string;
   public x: number;
   public y: number;
 
   constructor(init: MethodModelInit) {
     this.id = init.id ?? MethodModel.generateId();
-    this.kind = new MethodView(this.id);
     this.label = init.label;
     this.x = init.x ?? 0;
     this.y = init.y ?? 0;
+  }
+
+  createView(): ICanvasElementView<this> {
+    return new MethodView(this.id);
   }
 
   public measure(): { width: number; height: number } {
